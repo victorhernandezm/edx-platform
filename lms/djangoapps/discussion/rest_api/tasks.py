@@ -27,7 +27,7 @@ def send_thread_created_notification(thread_id, course_key_str, user_id):
     user = User.objects.get(id=user_id)
     course = get_course_with_access(user, 'load', course_key, check_if_enrolled=True)
     notification_sender = DiscussionNotificationSender(thread, course, user)
-    notification_sender.send_new_thread_created_notification()
+    notification_sender.send_new_thread_created_notification(course.id)
 
 
 @shared_task
