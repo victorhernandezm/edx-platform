@@ -20,6 +20,7 @@ from lms.djangoapps.courseware.access_response import (
     DataSharingConsentRequiredAccessError,
     EnrollmentRequiredAccessError,
     IncorrectActiveEnterpriseAccessError,
+    StartDateEnterpriseLearnerError,
     StartDateError
 )
 from lms.djangoapps.courseware.masquerade import get_course_masquerade, is_masquerading_as_student
@@ -91,6 +92,12 @@ def check_start_date(user, days_early_for_beta, start, course_key, display_error
         should_grant_access = now > effective_start
         if should_grant_access:
             return ACCESS_GRANTED
+
+        enterprise_enrollments = EnterpriseCourseEnrollment.objects.filter(
+            course_id=course_key, enterprise_customer_user__user_id=user.id
+        )
+        if enterprise_enrollments.exists():
+            return StartDateEnterpriseLearnerError(start, display_error_to_user=display_error_to_user)
 
         return StartDateError(start, display_error_to_user=display_error_to_user)
 
